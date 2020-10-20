@@ -1,4 +1,4 @@
-# Template Bootstrap for JS First
+# Template Starter Kit for JS First
 
 ボイラープレートとして使用可能なCommerbleテンプレートサンプルです。
 
