@@ -1,0 +1,23 @@
+﻿@{
+  var shipping = Page.ViewData.Model as VM.PurchaseShipping; 
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages; 
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+	customerEmail = shipping.Customer.EmailAddr,
+	customerAddress = shipping.OrderCustomerOrderedAddress,
+	destAddress = shipping.DeliveryOrderAddress,
+	deliveryMethod = DeliveryMethod.Default,
+	selectableDeliveryMethods = new []{ 
+		new SelectListItem { Text = "宅配便", Value = ((int)DeliveryMethod.Default).ToString(), Selected = true },
+		new SelectListItem { Text = "メール便", Value = ((int)DeliveryMethod.Mail).ToString(), Selected = false, Disabled = true },
+	},
+	savedDestAddresses = shipping.MemberAddressList,
+    token = tokenValue.Groups[1].Value,
+	action = Page.Url.RouteUrl("ModdPurchase", new { cart=shipping.Cart.CartDefinition.CartId, action="Shipping"} )
+  }))
+</script>

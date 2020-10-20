@@ -1,0 +1,50 @@
+﻿@{
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var orders = Page.ViewData.Model as IEnumerable<PurchaseOrder>;
+
+	var orderStatus = new Dictionary<OrderStatus,string>{
+		{OrderStatus.Accept,       "注文完了"},
+		{OrderStatus.UnAllocate,   "注文完了"},
+		{OrderStatus.PartAllocate, "出荷準備中"},
+		{OrderStatus.Allocated,    "出荷準備中"},
+		{OrderStatus.ShipIndicate, "出荷準備中"},
+		{OrderStatus.Ship,         "出荷完了"},
+		{OrderStatus.Arrival,      "お届け完了"},
+		{OrderStatus.Booked,       "お届け完了"},
+		{OrderStatus.Cancel,       "キャンセル"},
+		{OrderStatus.ShipSuspend,  "出荷準備中"}
+	};
+
+	int page, size = 10;
+	if( !Int32.TryParse((Page.Request.QueryString["page"] ?? "0"), out page)){
+		page = 0;
+	}
+	var itemCount = orders.Count();
+	var itemList = orders.Skip(page*size);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	list = itemList.Select(o => new {
+		id = o.OrderId,
+		orderDate = o.OrderDate.ToString("yyyy年MM月dd日 hh:mm:ss"),
+		total = o.TotalPayment,
+		status = o.OrderStatus,
+		statusText = orderStatus[o.OrderStatus],
+		lines = new object[0]
+	}),
+	total = itemCount,
+	lastPage = Math.Max(0, itemCount / size + Math.Min(1, itemCount % size) - 1),
+	page,
+	size,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+  }, Jil.Options.ISO8601))
+</script>

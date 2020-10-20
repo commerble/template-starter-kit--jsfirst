@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <title>@ViewBag.PageTitle</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,user-scalable=no,maximum-scale=1">
+  <meta name="keywords" content="@ViewBag.PageKeywords">
+  <meta name="description" content="@ViewBag.PageDescription">
+  <link rel="icon" href="https://via.placeholder.com/70x70">
+  <link rel="stylesheet" href="@Href($"~/bundle.css?{ViewBag.ResourceSuffix}")">
+  @if (ViewBag.JsonLd != null) {
+  <script type="application/ld+json">@Raw(Jil.JSON.SerializeDynamic(ViewBag.JsonLd))</script>
+  }
+</head>
+<body>
+  @RenderBody()
+  <div id="app"></div>
+  <script>window.href = function (relativePath, full) { return (full ? '@Page.Template.SecuredHost(true)' : '') + relativePath.replace(/^~\//, '@Href("~/")') }</script>
+  <script async src="@Href($"~/bundle.js?{ViewBag.ResourceSuffix}")"></script>
+</body>
+</html>

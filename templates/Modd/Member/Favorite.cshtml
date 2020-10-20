@@ -1,0 +1,34 @@
+﻿@{
+	var favorite = Page.ViewData.Model as Favorite;
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var tokenTag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	favorite = new {
+		id = favorite.ProductId,
+		product = new {
+			id = favorite.ProductId,
+			name = favorite.Product.Name,
+			color = favorite.Product.ExternalId3,
+			size = favorite.Product.ExternalId4,
+			unitPriceWithTax = Page.Template.GetUnitPriceWithTax(favorite.ProductId),
+			icon = "https://via.placeholder.com/64x64?text=Item"
+		}
+	},
+	token = tokenValue.Groups[1].Value,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites", id=(int?)null}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+	action = Page.Template.SecuredLink("ModdDefault", new { controller="Member", action="Favorites", id=favorite.ProductId})
+  }, Jil.Options.ISO8601))
+</script>

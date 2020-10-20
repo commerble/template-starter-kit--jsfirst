@@ -1,0 +1,20 @@
+@{
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var tag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+	if (ViewBag.NotProduction == false) {
+		var token = viewData.Messages.FirstOrDefault(m => m.StartsWith("Recovery.Token"));
+		if (token != null) {
+			viewData.Messages.Remove(token);
+		}
+	} 
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+    token = tokenValue.Groups[1].Value,
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Site", action="Recovery" }),
+  }))
+</script>

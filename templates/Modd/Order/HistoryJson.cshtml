@@ -1,0 +1,19 @@
+@{
+    Layout = null;
+	Page.Response.ContentType = "application/json";
+	var cart = Page.ViewData.Model as HistoryCart;
+}
+@Raw(Jil.JSON.Serialize(cart.ExpandItems.Where(item => item.OrderLineType != OrderLineType.SetProductChild).Select(item => new {
+    id = item.OrderLineId,
+    type = item.OrderLineType,
+    product = new {
+        id = item.ProductId,
+        name = item.Product.Name,
+        color = item.Product.ExternalId3,
+        size = item.Product.ExternalId4,
+        icon = "https://via.placeholder.com/64x64?text=Item"
+    },
+    unitPriceWithTax = item.UnitPrice + item.UnitTax,
+    qty = item.RequestAmount,
+    linePrice = item.LinePrice,
+})))

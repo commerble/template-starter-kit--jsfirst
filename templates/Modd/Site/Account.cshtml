@@ -1,0 +1,32 @@
+﻿@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+  var account = Page.ViewData.Model as VM.Account;
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+  if (!IsPost) {
+	  account.Sex = HumanSexes.NotKnown;
+	  account.Subscribe = true;
+  } 
+  account.Password = null;
+  account.ConfirmPassword = null;
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    account,
+    sexes = new[] { 
+      new SelectListItem { Text = "未指定", Value = HumanSexes.NotKnown.ToString(), Selected = account.Sex == HumanSexes.NotKnown },
+      new SelectListItem { Text = "男性", Value = HumanSexes.Male.ToString(), Selected = account.Sex == HumanSexes.Male },
+      new SelectListItem { Text = "女性", Value = HumanSexes.Female.ToString(), Selected = account.Sex == HumanSexes.Female },
+    },
+    subscribes = new [] {
+      new SelectListItem { Text = "受け取る", Value = "true", Selected = account.Subscribe == true },
+      new SelectListItem { Text = "受け取らない", Value = "false", Selected = account.Subscribe == false },
+    },
+    command = "confirm",
+    commandText = "確認",
+    token = tokenValue.Groups[1].Value,
+    action = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="Account" }),
+  }, Jil.Options.ISO8601))
+</script>

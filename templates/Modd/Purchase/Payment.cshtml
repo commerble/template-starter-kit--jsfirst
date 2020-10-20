@@ -1,0 +1,44 @@
+﻿@{
+  var payment = Page.ViewData.Model as VM.PurchasePayment;
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+  var paymentMethods = new Dictionary<PaymentMethod,string>{
+    { PaymentMethod.CashOnDelivery, "代引き" },
+    { PaymentMethod.Cvs, "コンビニ" },
+    { PaymentMethod.Offsite, "オフサイト" },
+    { PaymentMethod.Offline, "オフライン" },
+    { PaymentMethod.Token, "クレジットカード" },
+    { PaymentMethod.PointOnly, "全額ポイント" },
+    { PaymentMethod.External, "外部遷移" },
+    //{ PaymentMethod.None, "決済方法なし"},
+  };
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    lastReleaseDate = payment.Cart.LastReleaseDate,
+    canSpecifyDeliveryDate = payment.Cart.CanSpecifyDeliveryDate,
+    canSpecifyDeliveryTime = payment.Cart.CanSpecifyDeliveryTime,
+    selectableDeliveryDates = payment.Cart.SelectDeliveryDate(),
+    selectableDeliveryTimes = payment.Cart.SelectHourRange(),
+    deliveryDate = payment.DeliveryOrder.DeliveryDate,
+    deliveryHourRange = payment.DeliveryOrder.HourRange,
+    wrappingType = payment.DeliveryOrder.WrappingType,
+    senderName = payment.DeliveryOrder.SenderName,
+    usablePaymentMethods = paymentMethods.Select(kv => new SelectListItem { 
+      Text = kv.Value, 
+      Value = ((int)kv.Key).ToString(), 
+      Selected = kv.Key == payment.Cart.PaymentMethod, 
+      Disabled = !payment.Cart.UsablePaymentMethod.Contains(kv.Key)
+    }),
+    paymentMethod = (int)payment.PaymentMethod,
+    paymentDetail = payment.OrderCustomer.PaymentDetail,
+    activePoint = payment.Cart.Point,
+    pointOnlyTotal = payment.Cart.PointItemTotal,
+    pointMaxAmount = payment.Cart.PointMaxAmount,
+    token = tokenValue.Groups[1].Value,
+	  action = Page.Url.RouteUrl("ModdPurchase", new { cart=payment.Cart.CartDefinition.CartId, action="Payment"} )
+  }))
+</script>

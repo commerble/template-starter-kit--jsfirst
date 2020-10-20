@@ -1,0 +1,12 @@
+﻿@{
+	Layout = null;
+	Page.Response.ContentType = "application/json";
+  	var favorite = Page.ViewData.Model as VM.FavoriteAppend; 
+	var tokenTag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+}
+@Raw(Jil.JSON.Serialize(new {
+	token = tokenValue.Groups[1].Value,
+	action = Page.Template.SecuredLink("ModdDefault", new { controller="Member", action="Favorites", item=favorite.ProductId}),
+}))

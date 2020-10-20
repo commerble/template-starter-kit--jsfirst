@@ -1,0 +1,13 @@
+@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    token = tokenValue.Groups[1].Value,
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Site", action="Recovery", id=Page.ViewData["id"] }),
+  }))
+</script>

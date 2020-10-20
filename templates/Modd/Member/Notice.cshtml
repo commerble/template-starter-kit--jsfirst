@@ -1,0 +1,52 @@
+﻿@{
+	var notice = Page.ViewData.Model as ReserveRequest; 
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var tokenTag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+	var stats = new Dictionary<ReserveRequestStatus,string>{
+		{ReserveRequestStatus.Accept, "未入荷"},
+		{ReserveRequestStatus.Allocated, "入荷"},
+		{ReserveRequestStatus.Purchased, "購入済"},
+		{ReserveRequestStatus.Cancel, "キャンセル"}
+	};
+	var canCancel = new List<ReserveRequestStatus>{
+		ReserveRequestStatus.Accept,
+		ReserveRequestStatus.Allocated
+	};
+	var unitPriceWithTax = Page.Template.GetUnitPriceWithTax(notice.ProductId);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	reserve = new {
+		id = notice.ReserveRequestId,
+		qty = notice.Amount,
+		status = notice.Status,
+		statusText = stats[notice.Status],
+		expireAt = notice.ReservedStock?.ExpireAt,
+		canCancel = notice.Status == ReserveRequestStatus.Allocated,
+		canCartIn = canCancel.Contains(notice.Status),
+		subtotal = unitPriceWithTax * notice.Amount,
+		product = new {
+			id = notice.ProductId,
+			name = notice.Product.Name,
+			color = notice.Product.ExternalId3,
+			size = notice.Product.ExternalId4,
+			unitPriceWithTax,
+			icon = "https://via.placeholder.com/64x64?text=Item"
+		}
+	},
+	token = tokenValue.Groups[1].Value,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices", id=(int?)null}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+	action = Page.Template.SecuredLink("ModdDefault", new { controller="Member", action="Notices", id=notice.ReserveRequestId})
+  }, Jil.Options.ISO8601))
+</script>

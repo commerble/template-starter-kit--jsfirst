@@ -1,0 +1,20 @@
+﻿@{
+  var account = Page.ViewData.Model as PointBank.Account;
+	if(account == null){
+		 account = new PointBank.Account();
+	}
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new {
+    activePoint = account.ActivePoint,
+	temporaryPoint = account.TemporaryPoint,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+  }, Jil.Options.ISO8601))
+</script>

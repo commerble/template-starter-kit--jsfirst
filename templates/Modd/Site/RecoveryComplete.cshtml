@@ -1,0 +1,9 @@
+@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages
+  }))
+</script>

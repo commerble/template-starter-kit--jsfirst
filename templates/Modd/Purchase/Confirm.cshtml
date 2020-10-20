@@ -1,0 +1,59 @@
+﻿@{
+  var cart = Page.ViewData.Model as ShoppingCartBase;
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+  var paymentMethods = new Dictionary<PaymentMethod,string>{
+    { PaymentMethod.CashOnDelivery, "代引き" },
+    { PaymentMethod.Cvs, "コンビニ" },
+    { PaymentMethod.Offsite, "オフサイト" },
+    { PaymentMethod.Offline, "オフライン" },
+    { PaymentMethod.Token, "クレジットカード" },
+    { PaymentMethod.PointOnly, "全額ポイント" },
+    { PaymentMethod.External, "外部遷移" },
+    { PaymentMethod.None, "決済方法なし"},
+  };
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+	items = cart.ExpandItems.Where(item => item.OrderLineType != OrderLineType.SetProductChild).Select(item => new {
+		id = item.ProductId,
+		name = item.Product.Name,
+		type = item.OrderLineType,
+		color = item.Product.ExternalId3,
+		size = item.Product.ExternalId4,
+		unitPriceWithTax = item.UnitPrice + item.UnitTax,
+		qty = item.RequestAmount,
+		linePrice = item.LinePrice,
+		stockout = cart.Errors.Any(error => error.ErrorType == ShoppingCartErrorType.StockOut && error.Item == item),
+		icon = "https://via.placeholder.com/64x64?text=Item"
+	}),
+	campaigns = cart.AppliedCampaigns.Select(campaign => new {
+		id = campaign.CampaignId,
+		name = campaign.CampaignName,
+		type = campaign.CampaignType,
+	}),
+	subtotal = cart.Subtotal,
+	total = cart.TotalPayment,
+	tax = cart.Items.Sum(i=>i.Tax),
+	discount = cart.DiscountPrice,
+	deliveryCharge = cart.TotalTax,
+	paymentCharge = cart.TotalTax,
+	usagePoint = cart.TotalUsagePoint,
+	chargePoint = cart.ChargePointSummary,
+	paymentMethod = paymentMethods[cart.PaymentMethod],
+	paymentDetail = cart.OrderCustomer.PaymentDetail,
+	customerEmail = cart.OrderCustomer.EmailAddr,
+	customerAddress = cart.OrderCustomerOrderedAddress,
+	destAddress = cart.DeliveryOrderAddress,
+	deliveryDate = cart.DeliveryOrder.DeliveryDate,
+	deliveryHourRange = cart.DeliveryOrder.HourRange,
+	wrappingType = cart.DeliveryOrder.WrappingType == 2 ? "する" : "しない",
+	senderName = cart.DeliveryOrder.SenderName,
+	token = tokenValue.Groups[1].Value,
+	action = Page.Url.RouteUrl("ModdPurchase", new { cart=cart.CartDefinition.CartId, action="Index"} ),
+	back = Page.Url.RouteUrl("ModdPurchase", new { cart=cart.CartDefinition.CartId, action="Payment"} ),
+  }, Jil.Options.ISO8601))
+</script>

@@ -1,0 +1,65 @@
+﻿@{
+	var notices = Page.ViewData.Model as IEnumerable<ReserveRequest>; 
+  	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+
+	var stats = new Dictionary<ReserveRequestStatus,string>{
+		{ReserveRequestStatus.Accept, "未入荷"},
+		{ReserveRequestStatus.Allocated, "入荷"},
+		{ReserveRequestStatus.Purchased, "購入済"},
+		{ReserveRequestStatus.Cancel, "キャンセル"}
+	};
+	
+	var canCancel = new List<ReserveRequestStatus>{
+		ReserveRequestStatus.Accept,
+		ReserveRequestStatus.Allocated
+	};
+
+	var statsSort = new Dictionary<ReserveRequestStatus,int>{
+		{ReserveRequestStatus.Accept, 9},
+		{ReserveRequestStatus.Allocated, 10},
+		{ReserveRequestStatus.Purchased, 8},
+		{ReserveRequestStatus.Cancel, 0}
+	};
+
+	int page, size = 10;
+	if( !Int32.TryParse((Page.Request.QueryString["page"] ?? "0"), out page)){
+		page = 0;
+	}
+	var itemCount = notices.Count();
+  	var itemList = notices.OrderByDescending(n=> statsSort[n.Status] ).ThenByDescending(n=> n.ReserveRequestId).Skip(page*size);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	list = itemList.Select(o => new {
+		id = o.ReserveRequestId,
+		qty = o.Amount,
+		status = o.Status,
+		statusText = stats[o.Status],
+		expireAt = o.ReservedStock?.ExpireAt,
+		canCancel = o.Status == ReserveRequestStatus.Allocated,
+		canCartIn = canCancel.Contains(o.Status),
+		product = new {
+			id = o.ProductId,
+			name = o.Product.Name,
+			color = o.Product.ExternalId3,
+			size = o.Product.ExternalId4,
+			unitPriceWithTax = Page.Template.GetUnitPriceWithTax(o.ProductId),
+			icon = "https://via.placeholder.com/64x64?text=Item"
+		}
+	}),
+	total = itemCount,
+	lastPage = Math.Max(0, itemCount / size + Math.Min(1, itemCount % size) - 1),
+	page,
+	size,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+  }, Jil.Options.ISO8601))
+</script>

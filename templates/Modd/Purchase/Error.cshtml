@@ -1,0 +1,26 @@
+﻿@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var cart = Page.ViewData.Model as ShoppingCartBase;
+	var user = Page.Request.IsAuthenticated ? 
+              Membership.GetUser(Page.User.Identity.Name) as Crosswarp.Modd.Account.Web.ModdMembershipUser : 
+              null;
+  
+  if ((user == null || user.IsAnonymous) && viewData.Errors.Contains("PointUsageShortage		")){ 
+		viewData.Errors.Remove("PointUsageShortage		");
+		foreach( var item in cart.Items){
+			if(Page.Template.GetProductPaymentMethods(item.ProductId).All(p => p==PaymentMethod.PointOnly)){
+				viewData.Errors.Add("SelectedPointItemByGuest	"+item.Product.Name);
+			}
+		}
+  }
+  var back = ((bool?)Page.ViewData["BackToCart"] ?? false) ?
+                    Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="Cart"} ) :
+                    "javascript:history.back();";
+}
+<script id="pagedata" type="application/json" data-component="ErrorPurchasePage">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+    back
+  }))
+</script>
