@@ -1,0 +1,36 @@
+﻿@{
+	var delivery = Page.ViewData.Model as VM.HistoryDelivery;
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	delivery.Cart.SpecifiableDeliveryDateRangeStart = DateTime.Now.Date.AddDays(2);
+	delivery.Cart.SpecifiableDeliveryDateRangeEnd = DateTime.Now.Date.AddDays(16);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	lastReleaseDate = delivery.Cart.LastReleaseDate,
+    canSpecifyDeliveryDate = delivery.Cart.CanSpecifyDeliveryDate,
+    canSpecifyDeliveryTime = delivery.Cart.CanSpecifyDeliveryTime,
+    selectableDeliveryDates = delivery.Cart.SelectDeliveryDate(delivery.DeliveryOrder.DeliveryDate),
+    selectableDeliveryTimes = delivery.Cart.SelectHourRange(delivery.DeliveryOrder.HourRange),
+	deliveryDate = delivery.DeliveryOrder.DeliveryDate?.ToString("yyyy/MM/dd"),
+    deliveryHourRange = delivery.DeliveryOrder.HourRange,
+    wrappingType = delivery.DeliveryOrder.WrappingType,
+	selectableWrappingType = new [] { 
+		new SelectListItem { Text = "する", Value = "2", Selected = delivery.DeliveryOrder.WrappingType == 2 },
+		new SelectListItem { Text = "しない", Value = "1", Selected = delivery.DeliveryOrder.WrappingType == 1 },
+	},
+    senderName = delivery.DeliveryOrder.SenderName,
+    accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History", id=(int?)null}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    cancelUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="HistoryCancel", id=delivery.Cart.OrderId} ),
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Order", action="History", id=delivery.Cart.OrderId}),
+    command = "delivery"
+  }, Jil.Options.ISO8601))
+</script>

@@ -1,0 +1,41 @@
+@{
+    Layout = null;
+    var product = new {
+        id = 1,
+        name = "サンプル商品 - Sample Item",
+        variations = Enumerable.Range(3, 12).Select(id => {
+            var p = Page.Template.GetProduct(id);
+            return new {
+                id,
+                color = p.ExternalId3,
+                size = p.ExternalId4,
+                unitPriceWithTax = Page.Template.GetUnitPriceWithTax(id),
+                stockout = Page.Template.GetProductAmount(id) <= 0,
+                icon = "https://via.placeholder.com/64x64?text=Item"
+            };
+        }),
+        category = new {
+            id = "category1",
+            name = "カテゴリ"
+        },
+        images = new []{
+            new { full = "https://via.placeholder.com/640x640?text=Full%201", mini = "https://via.placeholder.com/64x64?text=Mini%201" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%202", mini = "https://via.placeholder.com/64x64?text=Mini%202" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%203", mini = "https://via.placeholder.com/64x64?text=Mini%203" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%204", mini = "https://via.placeholder.com/64x64?text=Mini%204" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%205", mini = "https://via.placeholder.com/64x64?text=Mini%205" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%206", mini = "https://via.placeholder.com/64x64?text=Mini%206" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%207", mini = "https://via.placeholder.com/64x64?text=Mini%207" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%208", mini = "https://via.placeholder.com/64x64?text=Mini%208" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%209", mini = "https://via.placeholder.com/64x64?text=Mini%209" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%2010", mini = "https://via.placeholder.com/64x64?text=Mini%2010" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%2011", mini = "https://via.placeholder.com/64x64?text=Mini%2011" },
+            new { full = "https://via.placeholder.com/640x640?text=Full%2012", mini = "https://via.placeholder.com/64x64?text=Mini%2012" },
+        },
+        description = @"<p>彼は今やはりこの運動心というものの後を打ちなあり。</p>
+<p>けっして先刻が観念者はまああるお話ならないかもをなって来るたにも返事しゃべっありなながら、そうにもなっましないたな。</p>
+<p>背後を潰すでしょのはとうてい十月がついなませで。</p>
+<p>つい大森さんで病気資格いろいろ講演にならんでしょ本位こういう大学私か観察にとともにご融通たですましなが、その今も彼らか賞弟の釣って、嘉納さんののに空位のそれをもっともお批評と聴くてそれ自己がご脱却に気に入るようにいくら小意味とすまだなけれじゃ、必ずしもまあ相違よりするですて行くですのがとどまらなう。</p>"
+    };
+}
+@Raw(Jil.JSON.Serialize(product, Jil.Options.ISO8601CamelCase))

@@ -1,0 +1,79 @@
+@{
+    ViewBag.PageTitle = "サンプル商品 | SAMPLE SHOP";
+    ViewBag.PageKeyword = "default meta keyword";
+    ViewBag.PageDescription = "default meta description";
+    ViewBag.OgImage = "https://via.placeholder.com/320x320?text=Sample Item";
+    ViewBag.JsonLd = new[] {
+        new Dictionary<string, object> {
+            ["@context"] = "https://schema.org/",
+            ["@type"] = "BreadcrumbList",
+            ["itemListElement"] = new [] {
+                new Dictionary<string, object> {
+                    ["@type"] = "ListItem",
+                    ["position"] = 1,
+                    ["name"] = "Home",
+                    ["item"] = Page.Template.SecuredHost(true) + Href("~/")
+                },
+                new Dictionary<string, object> {
+                    ["@type"] = "ListItem",
+                    ["position"] = 2,
+                    ["name"] = "Category",
+                    ["item"] = Page.Template.SecuredHost(true) + Href("~/category/")
+                },
+                new Dictionary<string, object> {
+                    ["@type"] = "ListItem",
+                    ["position"] = 3,
+                    ["name"] = "Sample Item",
+                    ["item"] = Page.Template.SecuredHost(true) + Page.Request.Url.AbsolutePath
+                },
+            }
+        },
+        new Dictionary<string, object> {
+            ["@context"] = "https://schema.org/",
+            ["@type"] = "Product",
+            ["name"] = "Sample Item",
+            ["image"] = new [] { "https://via.placeholder.com/320x320?text=Sample%20Item" },
+            ["description"] = ViewBag.PageDescription,
+            ["sku"] = "sample001",
+            ["mpn"] = "sample001", // Manufacturer Part Number 製品番号
+            ["category"] = "Category",
+            ["brand"] = new Dictionary<string, object> {
+                ["@type"] = "Brand",
+                ["name"] = "ハイブランド",
+                ["url"] = "https://example.com/",
+                ["logo"] = "https://via.placeholder.com/320x320?text=High%20Brand",
+                ["slogan"] = "とても人気"
+            },
+            // ["review"] = new Dictionary<string, dynamic> {
+            //     ["@type"] = "Review",
+            //     ["reviewRating"] = new Dictionary<string, dynamic> {
+            //         ["@type"] = "Rating",
+            //         ["ratingValue"] = "4",
+            //         ["bestRating"] = "5"
+            //    },
+            //     ["author"] =  new Dictionary<string, dynamic> {
+            //         ["@type"] = "Person",
+            //         ["name"] = "20代女性",
+            //     }
+            // },
+            // ["aggregateRating"] = new Dictionary<string, dynamic> {
+            //     ["@type"] = "AggregateRating",
+            //     ["ratingValue"] = "4.4",
+            //     ["reviewCount"] = "89"
+            // },
+            ["offers"] = new Dictionary<string, object> {
+                ["@type"] = "Offer",
+                ["url"] = Page.Request.Url,
+                ["priceCurrency"] = "JPY",
+                ["price"] = 1000,
+                // ["priceValidUntil"] = "yyyy-MM-dd",
+                ["itemCondition"] = "https://schema.org/NewCondition",
+                ["availability"] = false ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+                ["seller"] = new Dictionary<string, object> {
+                    ["@type"] = "Organization",
+                    ["name"] = "Sample Company"
+                }
+            }
+        }
+    };
+}

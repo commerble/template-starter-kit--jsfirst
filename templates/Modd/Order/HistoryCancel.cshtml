@@ -1,0 +1,70 @@
+﻿@{
+	var cart = Page.ViewData.Model as CancelCart; 
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var tokenTag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+	var orderStatus = new Dictionary<OrderStatus,string>{
+		{OrderStatus.Accept,"受注"},
+		{OrderStatus.UnAllocate,"未引当"},
+		{OrderStatus.PartAllocate,"中途引当"},
+		{OrderStatus.Allocated,"引当済"},
+		{OrderStatus.ShipIndicate,"出荷指示済"},
+		{OrderStatus.Ship,"出荷済"},
+		{OrderStatus.Arrival,"着荷済"},
+		{OrderStatus.Booked,"計上済"},
+		{OrderStatus.Cancel,"キャンセル"},
+		{OrderStatus.ShipSuspend,"出荷保留"}
+	};
+
+	var pointFixed = new List<OrderStatus>{OrderStatus.Arrival,OrderStatus.Booked};
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+    order = new {
+		id = cart.OrderId,
+		orderDate = cart.OrderDate.ToString("yyyy年MM月dd日 hh:mm:ss"),
+		orderStatus = cart.ReturnDate == null ? orderStatus[cart.OrderStatus] : "返品済み",
+		items = cart.ExpandItems.Where(item => item.OrderLineType != OrderLineType.SetProductChild).Select(item => new {
+			id = item.ProductId,
+			name = item.Product.Name,
+			type = item.OrderLineType,
+			color = item.Product.ExternalId3,
+			size = item.Product.ExternalId4,
+			unitPriceWithTax = item.UnitPrice + item.UnitTax,
+			qty = item.RequestAmount,
+			linePrice = item.LinePrice,
+			stockout = cart.Errors.Any(error => error.ErrorType == ShoppingCartErrorType.StockOut && error.Item == item),
+			pointonly = item.IsPointOnly,
+			icon = "https://via.placeholder.com/64x64?text=Item"
+		}),
+		campaigns = cart.AppliedCampaigns.Select(campaign => new {
+			id = campaign.CampaignId,
+			name = campaign.CampaignName,
+			type = campaign.CampaignType,
+		}),
+		canCancel = cart.CanCancel,
+		subtotal = cart.Subtotal,
+		total = cart.TotalPayment,
+		tax = cart.Items.Sum(i=>i.Tax),
+		discount = cart.DiscountPrice,
+		deliveryCharge = cart.TotalTax,
+		paymentCharge = cart.TotalTax,
+		usagePoint = cart.TotalUsagePoint,
+		chargePoint = cart.ChargePointSummary,
+	},
+	token = tokenValue.Groups[1].Value,
+    accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History", id=(int?)null}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    cancelUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="HistoryCancel", id=cart.OrderId} ),
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Order", action="History", id=cart.OrderId}),
+  }, Jil.Options.ISO8601))
+</script>

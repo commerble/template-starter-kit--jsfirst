@@ -1,0 +1,23 @@
+﻿@{
+  var customer = Page.ViewData.Model as VM.HistoryCustomer; 
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+    customerEmail = customer.OrderCustomer.EmailAddr,
+    customerAddress = customer.OrderCustomer.OrderedAddress,
+    accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History", id=(int?)null}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    cancelUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="HistoryCancel", id=customer.Cart.OrderId} ),
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Order", action="History", id=customer.Cart.OrderId}),
+    command = "customer"
+  }, Jil.Options.ISO8601))
+</script>

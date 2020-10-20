@@ -1,0 +1,8 @@
+﻿@{
+	var controller = Page.ViewContext.RequestContext.RouteData.Values["controller"] as string;
+}
+<script id="pagedata" type="application/json" data-component="Error400Page">
+  @Raw(Jil.JSON.Serialize(new{
+    controller
+  }))
+</script>

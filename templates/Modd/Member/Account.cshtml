@@ -1,0 +1,34 @@
+@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages; 
+  var account = Page.ViewData.Model as VM.Account;
+  account.Password = null;
+  account.ConfirmPassword = null;
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+    account,
+    sexes = new[] { 
+      new SelectListItem { Text = "未指定", Value = HumanSexes.NotKnown.ToString(), Selected = account.Sex == HumanSexes.NotKnown },
+      new SelectListItem { Text = "男性", Value = HumanSexes.Male.ToString(), Selected = account.Sex == HumanSexes.Male },
+      new SelectListItem { Text = "女性", Value = HumanSexes.Female.ToString(), Selected = account.Sex == HumanSexes.Female },
+    },
+    subscribes = new [] {
+      new SelectListItem { Text = "受け取る", Value = "true", Selected = account.Subscribe == true },
+      new SelectListItem { Text = "受け取らない", Value = "false", Selected = account.Subscribe == false },
+    },
+    accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    actionUsernameUrl = Page.Template.SecuredLink("ModdDefault", new {controller="Member", action="UserName"}),
+    actionAccountUrl  = Page.Template.SecuredLink("ModdDefault", new {controller="Member", action="Account"}),
+    actionAddressUrl  = Page.Template.SecuredLink("ModdDefault", new {controller="Member", action="AccountAddress"}),
+    command = "confirm"
+  }, Jil.Options.ISO8601))
+</script>

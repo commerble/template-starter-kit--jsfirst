@@ -1,0 +1,116 @@
+﻿@{
+	var cart = Page.ViewData.Model as HistoryCart; 
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+	var tokenTag = Page.Html.AntiForgeryToken().ToString();
+	var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+	var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+
+	var paymentMethod = new Dictionary<PaymentMethod,string>{
+	{ PaymentMethod.None, "決済方法なし"},
+	{ PaymentMethod.CashOnDelivery, "代引き" },
+	{ PaymentMethod.Offsite, "オフサイト" },
+	{ PaymentMethod.Offline, "オフライン" },
+	{ PaymentMethod.Token, "クレジットカード" },
+	{ PaymentMethod.PointOnly, "全額ポイント" },
+	{ PaymentMethod.Cvs, "コンビニ" },
+	{ PaymentMethod.External, "外部遷移" },
+	};
+
+	var orderStatus = new Dictionary<OrderStatus,string>{
+		{OrderStatus.Accept,       "注文完了"},
+		{OrderStatus.UnAllocate,   "注文完了"},
+		{OrderStatus.PartAllocate, "出荷準備中"},
+		{OrderStatus.Allocated,    "出荷準備中"},
+		{OrderStatus.ShipIndicate, "出荷準備中"},
+		{OrderStatus.Ship,         "出荷完了"},
+		{OrderStatus.Arrival,      "お届け完了"},
+		{OrderStatus.Booked,       "お届け完了"},
+		{OrderStatus.Cancel,       "キャンセル"},
+		{OrderStatus.ShipSuspend,  "出荷準備中"}
+	};
+
+	var hasChanges = cart.Original != null && (
+			cart.Original.PaymentMethod != cart.PaymentMethod
+		|| 	cart.Original.OrderCustomer.PaymentDetail != cart.OrderCustomer.PaymentDetail
+		||	cart.Original.OrderCustomer.EmailAddr != cart.OrderCustomer.EmailAddr
+		||	cart.Original.OrderCustomerOrderedAddress.ToString() != cart.OrderCustomerOrderedAddress.ToString()
+		||	cart.Original.OrderCustomerOrderedAddress.Tel != cart.OrderCustomerOrderedAddress.Tel
+		||	cart.Original.OrderCustomerOrderedAddress.Recipientlastname != cart.OrderCustomerOrderedAddress.Recipientlastname
+		||	cart.Original.OrderCustomerOrderedAddress.Recipientfirstname != cart.OrderCustomerOrderedAddress.Recipientfirstname
+		||	cart.Original.OrderCustomerOrderedAddress.Recipientlastnamekana != cart.OrderCustomerOrderedAddress.Recipientlastnamekana
+		||	cart.Original.OrderCustomerOrderedAddress.Recipientfirstnamekana != cart.OrderCustomerOrderedAddress.Recipientfirstnamekana
+		||	cart.Original.DeliveryOrderAddress.ToString() != cart.DeliveryOrderAddress.ToString()
+		||	cart.Original.DeliveryOrderAddress.Tel != cart.DeliveryOrderAddress.Tel
+		||	cart.Original.DeliveryOrderAddress.Recipientlastname != cart.DeliveryOrderAddress.Recipientlastname
+		||	cart.Original.DeliveryOrderAddress.Recipientfirstname != cart.DeliveryOrderAddress.Recipientfirstname
+		||	cart.Original.DeliveryOrderAddress.Recipientlastnamekana != cart.DeliveryOrderAddress.Recipientlastnamekana
+		||	cart.Original.DeliveryOrderAddress.Recipientfirstnamekana != cart.DeliveryOrderAddress.Recipientfirstnamekana
+		|| 	cart.Original.DeliveryOrder.DeliveryDate != cart.DeliveryOrder.DeliveryDate
+		|| 	cart.Original.DeliveryOrder.HourRange != cart.DeliveryOrder.HourRange
+		|| 	cart.Original.DeliveryOrder.WrappingType != cart.DeliveryOrder.WrappingType
+		|| 	cart.Original.DeliveryOrder.SenderName != cart.DeliveryOrder.SenderName
+	);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	hasChanges,
+	order = new {
+		id = cart.OrderId,
+		orderDate = cart.OrderDate.ToString("yyyy年MM月dd日 hh:mm:ss"),
+		orderStatus = cart.ReturnDate == null ? orderStatus[cart.OrderStatus] : "返品済み",
+		items = cart.ExpandItems.Where(item => item.OrderLineType != OrderLineType.SetProductChild).Select(item => new {
+			id = item.ProductId,
+			name = item.Product.Name,
+			type = item.OrderLineType,
+			color = item.Product.ExternalId3,
+			size = item.Product.ExternalId4,
+			unitPriceWithTax = item.UnitPrice + item.UnitTax,
+			qty = item.RequestAmount,
+			linePrice = item.LinePrice,
+			stockout = cart.Errors.Any(error => error.ErrorType == ShoppingCartErrorType.StockOut && error.Item == item),
+			pointonly = item.IsPointOnly,
+			icon = "https://via.placeholder.com/64x64?text=Item"
+		}),
+		campaigns = cart.AppliedCampaigns.Select(campaign => new {
+			id = campaign.CampaignId,
+			name = campaign.CampaignName,
+			type = campaign.CampaignType,
+		}),
+		canCancel = cart.CanCancel,
+		canModify = cart.CanModify,
+		canModifyPaymentMethod = cart.CanModifyPaymentMethod(),
+		subtotal = cart.Subtotal,
+		total = cart.TotalPayment,
+		tax = cart.Items.Sum(i=>i.Tax),
+		discount = cart.DiscountPrice,
+		deliveryCharge = cart.TotalTax,
+		paymentCharge = cart.TotalTax,
+		usagePoint = cart.TotalUsagePoint,
+		chargePoint = cart.ChargePointSummary,
+		paymentMethod = paymentMethod[cart.PaymentMethod],
+		paymentDetail = cart.OrderCustomer.PaymentDetail,
+		customerEmail = cart.OrderCustomer.EmailAddr,
+		customerAddress = cart.OrderCustomerOrderedAddress,
+		destAddress = cart.DeliveryOrderAddress,
+		deliveryDate = cart.DeliveryOrder.DeliveryDate,
+		deliveryHourRange = cart.DeliveryOrder.HourRange,
+		deliverNo = cart.DeliveryOrder.DeliveryNo,
+		wrappingType = cart.DeliveryOrder.WrappingType == 2 ? "する" : "しない",
+		senderName = cart.DeliveryOrder.SenderName,
+	},
+	token = tokenValue.Groups[1].Value,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History", id=(int?)null}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+	cancelUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="HistoryCancel", id=cart.OrderId} ),
+	action = Page.Template.SecuredLink("ModdDefault", new { controller="Order", action="History", id=cart.OrderId}),
+	command = "commit"
+  }, Jil.Options.ISO8601))
+</script>

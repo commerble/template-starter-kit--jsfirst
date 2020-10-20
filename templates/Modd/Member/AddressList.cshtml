@@ -1,0 +1,31 @@
+﻿@{
+	var addresses = Page.ViewData.Model as IEnumerable<UserAddress>;
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages; 
+
+	int page, size = 10;
+	if( !Int32.TryParse((Page.Request.QueryString["page"] ?? "0"), out page)){
+		page = 0;
+	}
+	var itemCount = addresses.Count();
+	var itemList = addresses.Skip(page*size);
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    messages = viewData.Messages,
+	list = itemList,
+	total = itemCount,
+	lastPage = Math.Max(0, itemCount / size + Math.Min(1, itemCount % size) - 1),
+	page,
+	size,
+	accountUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Account"}),
+    pointUrl    = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Point"}),
+    passwordUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Password"}),
+    quitUrl     = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Quit"}),
+    historyUrl  = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History"}),
+    noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
+    favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
+    addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    action = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="CreateAddress"}),
+  }, Jil.Options.ISO8601))
+</script>

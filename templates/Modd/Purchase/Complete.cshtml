@@ -1,0 +1,16 @@
+﻿@{
+  var order = Page.ViewData.Model as PurchaseOrder;
+  var isGuest = order.OrderCustomer.IsGuest;
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+}
+@{
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    orderId = order.OrderId,
+    isGuest,
+    memberHistory = Page.Url.RouteUrl("ModdDefault", new { controller="Order", action="History", id=order.OrderId} ),
+    guestHistory = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="GuestOrder", id=order.OrderCustomer.GuestAccessKey} ),
+  }))
+</script>
+}

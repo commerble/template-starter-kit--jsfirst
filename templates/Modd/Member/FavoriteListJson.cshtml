@@ -1,0 +1,7 @@
+﻿@{
+	Layout = null;
+	Page.Response.ContentType = "application/json";
+	var favorites = Page.ViewData.Model as IEnumerable<Favorite>;
+	var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+}
+@Raw(Jil.JSON.Serialize(favorites.Select(o => o.ProductId)))

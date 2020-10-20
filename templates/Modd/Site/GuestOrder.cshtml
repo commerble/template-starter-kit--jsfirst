@@ -1,0 +1,9 @@
+﻿@{
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    action = Page.Template.SecuredLink("ModdDefault", new { controller="Site", action="GuestOrder", id=Page.ViewData["id"]}),
+  }))
+</script>

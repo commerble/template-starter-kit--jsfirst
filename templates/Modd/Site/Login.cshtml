@@ -1,0 +1,18 @@
+@{
+  ViewBag.PageTitle = "Login";
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages;
+  var returnUrl = Page.ViewData["returnUrl"] as string;
+  var tag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tag, @"value=""([^\"".]*)""");
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+    returnUrl,
+    token = tokenValue.Groups[1].Value,
+    loginUrl = Page.Template.SecuredLink("ModdDefault", new { controller="Site", action="Login" }),
+    signupUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="Account" }),
+    guestUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="NewGuest", returnUrl }),
+  }))
+</script>

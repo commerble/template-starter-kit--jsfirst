@@ -1,0 +1,28 @@
+﻿@{
+  var account = Page.ViewData.Model as VM.Account;
+  var viewData = Page.ViewData[BasicController.ViewMessageKey] as ViewMessages; 
+  var tokenTag = Page.Html.AntiForgeryToken().ToString();
+  var tokenName = Regex.Match(tokenTag, @"name=""([^\"".]*)""");
+  var tokenValue = Regex.Match(tokenTag, @"value=""([^\"".]*)""");
+  var modelTag =Page.Html.ModelToObjectState("model",account);
+  var modelName = Regex.Match(modelTag, @"name=""([^\"".]*)""");
+  var modelValue = Regex.Match(modelTag, @"value=""([^\"".]*)""");
+}
+<script id="pagedata" type="application/json">
+  @Raw(Jil.JSON.Serialize(new{
+    errors = viewData.Errors,
+	  username = account.UserName,
+	  name = $"{account.LastName} {account.FirstName}",
+	  kana = $"{account.LastNameKana} {account.FirstNameKana}",
+ 	  birthday = account.Birthday?.ToString("yyyy年MM月dd日"),
+	  sex = account.Sex == HumanSexes.Male ? "男性"
+	      : account.Sex == HumanSexes.Female ? "女性"
+		    : "未指定",
+	  subscribe = account.Subscribe ? "受け取る" : "受け取らない",
+	  command = "create",
+	  commandText = "サインアップ",
+    token = tokenValue.Groups[1].Value,
+	  model = modelValue.Groups[1].Value,
+    action = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="Account" }),
+  }, Jil.Options.ISO8601))
+</script>
