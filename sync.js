@@ -15,6 +15,9 @@ const config = {
     mailTemplatePrefix: 'Mail',
     sharedTemplates: [
         'ModdSharedViewStart',
+    ],
+    escapeTemplates: [
+        'BundleScript'
     ]
 }
 
@@ -97,8 +100,11 @@ async function upload(file, nameMaxSize = 28) {
     const ext = path.extname(nameExt)
     const name = nameExt.replace(ext, '')
     const type = resolveType(name, ext)
-    const text = stripBom(await fs.readFile(file, 'utf8'))
     const template = await getTemplate(name)
+    let text = stripBom(await fs.readFile(file, 'utf8'))
+    if (config.escapeTemplates.includes(name)) {
+        text = escapeTemplate(text)
+    }
     const model = {
         ...(template || { Name: name }),
         Type: type,
@@ -196,6 +202,10 @@ function resolveType(name, ext) {
         return 'mail'
     
     return Object.keys(typeMap).find(key => typeMap[key] == ext)
+}
+
+function escapeTemplate(text) {
+    return text.replace(/\{\{/g, '{ {')
 }
 
 main().catch(message => console.error(message));
