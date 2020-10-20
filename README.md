@@ -31,7 +31,7 @@ $ npm run publish
 const config = {
     // Commerble Web APIの認証情報は環境変数で指定します。
     // 使用する環境変数名は apiEndpointEnvKey,apiUsernameEnvKey,apiPasswordEnvKeyで指定します。
-    // 例 set CBAPI_ENDPOINT=http://172.31.51.85/data
+    // 例 set CBAPI_ENDPOINT=http://localhost/data
     apiEndpointEnvKey: 'CBAPI_ENDPOINT',
     apiUsernameEnvKey: 'CBAPI_USERNAME',
     apiPasswordEnvKey: 'CBAPI_PASSWORD',
