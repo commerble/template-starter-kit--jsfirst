@@ -15,5 +15,6 @@
     noticeUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Notices"}),
     favoriteUrl = Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Favorites"}),
     addressesUrl= Page.Url.RouteUrl("ModdDefault", new { controller="Member", action="Addresses"}),
+    logoutUrl   = Page.Url.RouteUrl("ModdDefault", new { controller="Site", action="Logout", returnUrl=Href("~/")}),
   }, Jil.Options.ISO8601))
 </script>
