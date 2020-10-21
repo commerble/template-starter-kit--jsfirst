@@ -166,19 +166,13 @@ export default function createStore() {
             async registerFav({commit, getters}, {id, url}) {
                 if (getters.existsInFavs(id))
                     return
-                
-                let response = await fetch(href('~/member/createfavorite?item='+id), { redirect: 'manual' })
-                if (response.status == 0) {
+
+                if (loadedFav == LOADED_FAV_WAIT_LOGIN) {
                     location.replace(href('~/site/login?returnUrl=')+url)
                     return
                 }
                 
-                if (loadedFav == LOADED_FAV_WAIT_LOGIN) {
-                    await dispatch('loadFavs')
-                }
-
-                if (getters.existsInFavs(id))
-                    return
+                let response = await fetch(href('~/member/createfavorite?item='+id), { redirect: 'manual' })
 
                 if (!response.ok ||!response.headers.get('content-type').includes('application/json')) {
                     const text = await response.text()
