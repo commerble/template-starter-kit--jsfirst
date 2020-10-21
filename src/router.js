@@ -45,7 +45,10 @@ export default function createRouter(store) {
             { path: '/order/historyshipping/:orderId',      component: Page, meta: { layout: 'simple',  component: 'HistoryShippingPage', pagedata: true } },
             { path: '/order/historycancel/:orderId',        component: Page, meta: { layout: 'simple',  component: 'HistoryCancelPage',   pagedata: true } },
             { path: '*',                                    component: Error404Page, meta: { layout: 'default' } },
-        ]
+        ],
+        scrollBehavior (to, from, savedPosition) {
+            return savedPosition ? savedPosition : { x: 0, y: 0 }
+        }
     })
 
     router.beforeEach((to, from, next) => {
