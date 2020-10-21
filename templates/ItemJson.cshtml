@@ -1,5 +1,8 @@
 @{
     Layout = null;
+    if (Page.Request.Url.AbsolutePath.EndsWith("/1000")) {
+        throw new System.Web.HttpException(404, "NotFound");
+    }
     var product = new {
         id = 1,
         name = "サンプル商品 - Sample Item",

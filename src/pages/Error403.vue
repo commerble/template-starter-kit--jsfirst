@@ -10,7 +10,6 @@
                     アクセスしようとしたページは、現在利用できません。<br>
                     別のログインID でログインされている場合は、ログアウトしてからご利用下さい。
                 </p>
-                <p>発生コントローラ：{{controller}}</p>
                 <router-link to="/" class="button is-expanded">Topへ戻る</router-link>
             </div>
         </div>
@@ -19,7 +18,11 @@
 <script>
 export default {
     data() {
-        return JSON.parse(document.getElementById('pagedata').innerText)
+        const pagedata = document.getElementById('pagedata')
+        return pagedata ? JSON.parse(pagedata.innerText) : {}
+    },
+    errorCaptured() {
+        return false
     }
 }
 </script>

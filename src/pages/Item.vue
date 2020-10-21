@@ -115,7 +115,7 @@
                         </div>
                     </div>
                 </router-link>
-                <router-link to="/item/1001">
+                <router-link to="/item/1001/notfound">
                     <div class="card">
                         <div class="card-image">
                             <figure class="image is-4by3">
@@ -143,6 +143,11 @@
                     <li class="is-active"><router-link :to="`/item/${$route.params.id}`" area-current-value="page">{{detail.name}}</router-link></li>
                 </ul>
             </nav>
+        </template>
+        <template v-else>
+            <div style="height:100vh;">
+                Now Loading
+            </div>
         </template>
     </main>
 </template>
@@ -234,6 +239,10 @@ export default {
         },
         async init() {
             const result = await fetch(href('~/item/' + this.$route.params.id), { headers: { 'X-Template-Suffix': 'Json' } })
+            if (!result.ok) {
+                this.$emit('error', result.status)
+                return
+            }
             this.detail = await result.json()
             document.title = this.detail.name
         }

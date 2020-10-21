@@ -1,5 +1,5 @@
 <template>
-    <component ref="page" :is="component"></component>
+    <component ref="page" :is="component" @error="handleError"></component>
 </template>
 <script>
 import LoginPage from './Login.vue'
@@ -57,8 +57,22 @@ export default {
         // Front pages
         TopPage, ItemPage, 
     },
+    data() {
+        return {
+            error: null,
+        }
+    },
     computed: {
         component() {
+            if (this.error) {
+                return this.error == 400 ? 'Error400Page'
+                     : this.error == 403 ? 'Error403Page'
+                     : this.error == 404 ? 'Error404Page'
+                     : this.error == 406 ? 'Error406Page'
+                     : this.error == 409 ? 'Error409Page'
+                     : 'Error500Page'
+            }
+            
             if (this.$route.meta.pagedata === true) {
                 const pagedata = document.getElementById('pagedata')
                 if (pagedata == null) {
@@ -68,8 +82,22 @@ export default {
                     return pagedata.dataset.component
                 }
             }
+
             return this.$route.meta.component
         }
-    }
+    },
+    beforeRouteUpdate(to, from, next) {
+        this.error = null
+        next()
+    },
+    beforeRouteLeave(to, from, next) {
+        this.error = null
+        next()
+    },
+    methods: {
+        handleError(error) {
+            this.error = error
+        }
+    },
 }
 </script>

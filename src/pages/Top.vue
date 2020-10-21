@@ -38,6 +38,10 @@ export default {
         async init() {
             document.title = "SAMPLE SHOP"
             const search = await fetch(href('~/'), { headers: { 'X-Template-Suffix': 'Json' } })
+            if (!search.ok) {
+                this.$emit('error', result.status)
+                return
+            }
             const products = await search.json();
             this.items.splice(0, this.items.length, ...products)
         }
