@@ -53,3 +53,13 @@ const config = {
 
 このサンプルのテンプレート同期は片方向です。管理画面からの変更はダウンロードされません。
 
+## 初期設定
+
+`npm run publish`後、CMS管理画面で以下の4つのURLルーティングを登録します。
+
+| URLパターン       | テンプレート名 |
+|:-----------------|:--------------|
+|                  | Top           |
+| item/{ProductId} | Item          |
+| bundle.js        | BundleScript  |
+| bundle.css       | BundleStyle   |
